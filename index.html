@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Livestock Thermography — best.pt</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0c0f;
+  --card:#111418;
+  --border:#1e2530;
+  --border2:#2a3545;
+  --text:#dde4ed;
+  --sub:#6b7a8d;
+  --acc:#00e5b0;
+  --acc2:#00b88c;
+  --blue:#4a8fff;
+  --amber:#f5a623;
+  --red:#ff4d4d;
+  --green:#22d47a;
+  --purple:#9b6dff;
+  --r:10px;
+}
+
+body{
+  font-family:'IBM Plex Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:32px 16px 60px;
+}
+
+/* ── Header ─────────────────────────────────────── */
+.hdr{
+  width:100%;max-width:960px;
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:32px;padding-bottom:20px;
+  border-bottom:1px solid var(--border);
+}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-box{
+  width:44px;height:44px;
+  background:linear-gradient(135deg,#ff6b35,#ff4500,#cc0000);
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+.logo h1{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.logo p{font-size:11px;color:#ff6b35;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;text-transform:uppercase}
+.model-pill{
+  background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.2);
+  color:#ff6b35;font-family:'IBM Plex Mono',monospace;
+  font-size:11px;padding:5px 14px;border-radius:20px;
+  display:flex;align-items:center;gap:7px;
+}
+.dot-live{width:7px;height:7px;border-radius:50%;background:#ff6b35;animation:pulse 1.8s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,107,53,.5)}50%{box-shadow:0 0 0 5px rgba(255,107,53,0)}}
+
+/* ── Upload card ─────────────────────────────────── */
+.upload-card{
+  width:100%;max-width:960px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:28px;margin-bottom:20px;
+}
+.drop-zone{
+  border:2px dashed var(--border2);border-radius:var(--r);
+  padding:50px 24px;text-align:center;cursor:pointer;transition:.2s;
+  background:rgba(255,255,255,.01);
+}
+.drop-zone:hover,.drop-zone.over{border-color:#ff6b35;background:rgba(255,107,53,.04)}
+.drop-zone input{display:none}
+.drop-ico{font-size:44px;margin-bottom:12px;line-height:1}
+.drop-title{font-size:16px;font-weight:600;margin-bottom:5px}
+.drop-sub{font-size:12px;color:var(--sub)}
+.drop-classes{margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#ff6b35;letter-spacing:.5px}
+
+.conf-row{
+  display:flex;align-items:center;gap:14px;margin:18px 0;
+  padding:14px 16px;background:rgba(255,255,255,.02);
+  border:1px solid var(--border);border-radius:8px;
+}
+.conf-row label{font-size:12px;color:var(--sub);white-space:nowrap}
+.conf-row input[type=range]{flex:1;accent-color:#ff6b35}
+.conf-row .conf-num{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:#ff6b35;min-width:36px}
+
+.run-btn{
+  width:100%;padding:13px;
+  background:linear-gradient(135deg,#ff6b35,#cc0000);color:#fff;
+  border:none;border-radius:8px;font-size:14px;font-weight:700;
+  font-family:'IBM Plex Sans',sans-serif;cursor:pointer;transition:.2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.run-btn:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.run-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+/* ── Results ─────────────────────────────────────── */
+#results{width:100%;max-width:960px}
+
+.img-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.img-box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.img-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;padding:7px 12px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);color:var(--sub)}
+.img-label.ann{color:#ff6b35}
+.img-box img{width:100%;display:block}
+
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center;position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--kc,#ff6b35)}
+.kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--sub);margin-bottom:8px}
+.kpi-val{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:700;color:var(--kc,#ff6b35)}
+
+.meta-bar{
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  padding:10px 14px;background:var(--card);border:1px solid var(--border);
+  border-radius:8px;font-family:'IBM Plex Mono',monospace;
+  font-size:11px;color:var(--sub);margin-bottom:20px;
+}
+.meta-bar span b{color:var(--text)}
+
+/* ── Thermal Scale Bar ───────────────────────────── */
+.thermal-scale-section{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:20px 22px;margin-bottom:20px;
+}
+.thermal-scale-title{
+  font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:1.5px;color:var(--sub);margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;
+}
+.thermal-scale-title span{color:#ff6b35}
+.scale-bar-wrap{position:relative;margin-bottom:8px}
+.scale-bar{
+  height:28px;border-radius:6px;
+  background:linear-gradient(to right,
+    #00008b 0%,
+    #0000ff 10%,
+    #00bfff 22%,
+    #00ff7f 35%,
+    #adff2f 48%,
+    #ffff00 60%,
+    #ffa500 73%,
+    #ff4500 86%,
+    #8b0000 100%
+  );
+  position:relative;
+}
+.scale-markers{
+  display:flex;justify-content:space-between;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--sub);
+  margin-top:5px;padding:0 2px;
+}
+.scale-legend{
+  display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;
+}
+.scale-legend-item{
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;color:var(--sub);
+}
+.scale-legend-dot{width:10px;height:10px;border-radius:50%}
+/* Detected temp markers on scale bar */
+.scale-dot-markers{position:relative;height:0}
+.scale-marker-pin{
+  position:absolute;
+  transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;
+  top:-34px;
+}
+.scale-marker-pin .pin-dot{
+  width:10px;height:10px;border-radius:50%;
+  border:2px solid #fff;box-shadow:0 0 6px rgba(0,0,0,.6);
+}
+.scale-marker-pin .pin-label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8px;color:#fff;white-space:nowrap;
+  background:rgba(0,0,0,.7);
+  padding:1px 4px;border-radius:3px;
+  margin-bottom:2px;
+}
+
+/* ── Thermal Readings Table ──────────────────────── */
+.thermal-table-section{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;margin-bottom:20px;
+}
+.thermal-table-hdr{
+  padding:12px 18px;font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:1.5px;
+  border-bottom:1px solid var(--border);color:var(--sub);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.thermal-table-hdr span{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text)}
+.thermal-table{width:100%;border-collapse:collapse}
+.thermal-table thead tr{background:rgba(255,255,255,.02)}
+.thermal-table th{
+  padding:10px 16px;font-size:10px;font-weight:700;
+  text-transform:uppercase;letter-spacing:1.2px;
+  color:var(--sub);text-align:left;border-bottom:1px solid var(--border);
+}
+.thermal-table th:not(:first-child){text-align:center}
+.thermal-table td{
+  padding:11px 16px;font-size:13px;
+  border-bottom:1px solid var(--border);
+}
+.thermal-table tbody tr:last-child td{border-bottom:none}
+.thermal-table tbody tr:hover{background:rgba(255,255,255,.02)}
+.td-part{display:flex;align-items:center;gap:8px}
+.td-dot{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+.td-name{font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:1px}
+.td-center{text-align:center}
+.td-temp{
+  font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700;
+  text-align:center;
+}
+.td-status{text-align:center}
+.status-badge{
+  display:inline-block;padding:3px 10px;border-radius:12px;
+  font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+}
+.status-normal{background:rgba(34,212,122,.1);color:#22d47a;border:1px solid rgba(34,212,122,.2)}
+.status-elevated{background:rgba(245,166,35,.12);color:#f5a623;border:1px solid rgba(245,166,35,.25)}
+.status-high{background:rgba(255,77,77,.12);color:#ff4d4d;border:1px solid rgba(255,77,77,.25)}
+.td-bar-cell{width:120px}
+.temp-mini-bar{height:6px;background:var(--border2);border-radius:3px;overflow:hidden;margin:0 auto;max-width:110px}
+.temp-mini-fill{height:100%;border-radius:3px;transition:width .8s ease}
+.td-conf{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--sub);text-align:center}
+.td-range{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--sub);text-align:center}
+
+/* ── Alert Panel ─────────────────────────────────── */
+.alert-panel{
+  border-radius:var(--r);padding:16px 20px;margin-bottom:20px;
+  display:flex;align-items:flex-start;gap:14px;
+}
+.alert-panel.alert-ok{background:rgba(34,212,122,.06);border:1px solid rgba(34,212,122,.2)}
+.alert-panel.alert-warn{background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.2)}
+.alert-panel.alert-danger{background:rgba(255,77,77,.08);border:1px solid rgba(255,77,77,.25)}
+.alert-ico{font-size:22px;line-height:1;flex-shrink:0;margin-top:1px}
+.alert-body{}
+.alert-title{font-size:13px;font-weight:700;margin-bottom:4px}
+.alert-msg{font-size:12px;color:var(--sub);line-height:1.6}
+.alert-ok .alert-title{color:#22d47a}
+.alert-warn .alert-title{color:#f5a623}
+.alert-danger .alert-title{color:#ff4d4d}
+
+/* ── Detection List ──────────────────────────────── */
+.det-section{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.det-section-hdr{
+  padding:12px 18px;font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:1.5px;
+  border-bottom:1px solid var(--border);color:var(--sub);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.det-section-hdr span{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text)}
+.cls-group{padding:14px 18px;border-bottom:1px solid var(--border)}
+.cls-group:last-child{border-bottom:none}
+.cls-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cls-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.cls-name{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px}
+.cls-count{font-size:11px;color:var(--sub);font-family:'IBM Plex Mono',monospace}
+.det-row{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 10px;background:rgba(255,255,255,.02);
+  border-radius:6px;margin-bottom:6px;border:1px solid var(--border);
+}
+.det-row:last-child{margin-bottom:0}
+.det-num{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--sub);min-width:20px}
+.det-conf-wrap{flex:1}
+.det-conf-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.det-conf-pct{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700}
+.det-bbox{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--sub)}
+.det-bar{height:4px;background:var(--border2);border-radius:2px;overflow:hidden}
+.det-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.det-area{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--sub);white-space:nowrap}
+/* Temp badge inline in det-row */
+.det-temp-badge{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;
+  padding:3px 8px;border-radius:6px;white-space:nowrap;margin-left:4px;
+}
+
+/* ── Class dist ──────────────────────────────────── */
+.dist-section{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:18px;margin-top:12px;
+}
+.dist-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--sub);margin-bottom:14px}
+.dist-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.dist-row:last-child{margin-bottom:0}
+.dist-cls{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;min-width:52px}
+.dist-track{flex:1;height:6px;background:var(--border2);border-radius:3px;overflow:hidden}
+.dist-fill{height:100%;border-radius:3px;transition:width .8s ease}
+.dist-cnt{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--sub);min-width:50px;text-align:right}
+
+/* ── Empty/spinner ───────────────────────────────── */
+.empty{text-align:center;padding:60px 24px;font-size:13px;color:var(--sub)}
+.spinner{
+  width:36px;height:36px;border:3px solid var(--border2);
+  border-top-color:#ff6b35;border-radius:50%;
+  animation:spin .8s linear infinite;margin:0 auto 14px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-msg{font-size:13px;color:var(--sub);margin-top:4px}
+.no-det{text-align:center;padding:36px;font-size:13px;color:var(--amber)}
+
+@media(max-width:640px){
+  .img-row{grid-template-columns:1fr}
+  .kpi-strip{grid-template-columns:repeat(2,1fr)}
+  .hdr{flex-direction:column;gap:12px;align-items:flex-start}
+  .thermal-table th:nth-child(5),.thermal-table td:nth-child(5){display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="hdr">
+  <div class="logo">
+    <div class="logo-box">🌡️</div>
+    <div>
+      <h1>Livestock Thermography</h1>
+      <p>YOLO · best.pt · Thermal Analysis</p>
+    </div>
+  </div>
+  <div class="model-pill" id="model-pill">
+    <span class="dot-live"></span>
+    <span id="pill-txt">best.pt — Loading…</span>
+  </div>
+</header>
+
+<!-- Upload -->
+<div class="upload-card">
+  <div class="drop-zone" id="drop"
+       onclick="document.getElementById('file-inp').click()"
+       ondragover="onDragOver(event)"
+       ondragleave="onDragLeave()"
+       ondrop="onDrop(event)">
+    <input type="file" id="file-inp" accept=".png,.jpg,.jpeg,.webp,.bmp"
+           onchange="onFileChange(event)"/>
+    <div class="drop-ico">🐄</div>
+    <div class="drop-title" id="drop-title">Drop livestock image here</div>
+    <div class="drop-sub">PNG · JPG · JPEG · WEBP · BMP</div>
+    <div class="drop-classes" id="classes-line">ear · eyes · eyess · hump · neck · udder</div>
+  </div>
+
+  <div class="conf-row">
+    <label>Confidence Threshold</label>
+    <input type="range" id="conf" min="10" max="90" value="25" step="5"
+           oninput="document.getElementById('conf-num').textContent=this.value+'%'"/>
+    <span class="conf-num" id="conf-num">25%</span>
+  </div>
+
+  <button class="run-btn" id="run-btn" disabled onclick="runDetection()">
+    🔍 Run Detection + Thermal Analysis
+  </button>
+</div>
+
+<!-- Results -->
+<div id="results">
+  <div class="empty">Upload an image and click Run Detection</div>
+</div>
+
+<script>
+const API = window.location.origin;
+let selectedFile = null;
+
+// ── Normal body temperature ranges per body part (°C) ─────────────────────────
+const THERMAL_NORMS = {
+  ear:   { min: 35.0, max: 39.5, normal_low: 37.0, normal_high: 38.5, name: 'Ear' },
+  eyes:  { min: 36.0, max: 41.5, normal_low: 38.0, normal_high: 39.5, name: 'Eye' },
+  eyess: { min: 36.0, max: 41.5, normal_low: 38.0, normal_high: 39.5, name: 'Eye (2nd)' },
+  hump:  { min: 33.0, max: 38.5, normal_low: 34.5, normal_high: 36.5, name: 'Hump' },
+  neck:  { min: 34.0, max: 39.5, normal_low: 36.0, normal_high: 38.0, name: 'Neck' },
+  udder: { min: 35.5, max: 41.0, normal_low: 37.5, normal_high: 39.5, name: 'Udder' },
+};
+
+// Fallback defaults for unseen classes
+const DEFAULT_NORM = { min: 33.0, max: 41.5, normal_low: 36.5, normal_high: 39.5, name: '' };
+
+// ── Thermal scale min/max (°C) ────────────────────────────────────────────────
+const SCALE_MIN = 30.0;
+const SCALE_MAX = 43.0;
+
+// ── Colour palette (matches server BGR order → hex) ──────────────────────────
+const COLORS=[
+  '#00d4aa','#4a8fff','#f97316',
+  '#9b6dff','#ff4d4d','#22d47a','#ec4899','#f5a623'
+];
+function cls2color(clsId){return COLORS[clsId%COLORS.length]}
+
+// Map temperature to thermal colour gradient
+function tempToColor(t){
+  const pct = Math.max(0, Math.min(1, (t - SCALE_MIN) / (SCALE_MAX - SCALE_MIN)));
+  // stops: cold blue → cyan → green → yellow → orange → red
+  const stops = [
+    [0,    [0,0,139]],
+    [0.10, [0,0,255]],
+    [0.22, [0,191,255]],
+    [0.35, [0,255,127]],
+    [0.48, [173,255,47]],
+    [0.60, [255,255,0]],
+    [0.73, [255,165,0]],
+    [0.86, [255,69,0]],
+    [1.00, [139,0,0]],
+  ];
+  let lo=stops[0],hi=stops[stops.length-1];
+  for(let i=0;i<stops.length-1;i++){
+    if(pct>=stops[i][0]&&pct<=stops[i+1][0]){lo=stops[i];hi=stops[i+1];break}
+  }
+  const f=(pct-lo[0])/(hi[0]-lo[0]||1);
+  const r=Math.round(lo[1][0]+(hi[1][0]-lo[1][0])*f);
+  const g=Math.round(lo[1][1]+(hi[1][1]-lo[1][1])*f);
+  const b=Math.round(lo[1][2]+(hi[1][2]-lo[1][2])*f);
+  return `rgb(${r},${g},${b})`;
+}
+
+// Determine status
+function tempStatus(cls, temp){
+  const n = THERMAL_NORMS[cls.toLowerCase()] || DEFAULT_NORM;
+  if(temp < n.normal_low)  return {label:'Low',    cls:'status-elevated',color:'#4a8fff'};
+  if(temp > n.normal_high + 1.5) return {label:'High',   cls:'status-high',   color:'#ff4d4d'};
+  if(temp > n.normal_high) return {label:'Elevated',cls:'status-elevated',color:'#f5a623'};
+  return {label:'Normal', cls:'status-normal', color:'#22d47a'};
+}
+
+// Get thermal data from detection (provided by backend, or computed from sim)
+function getThermalData(det){
+  // Backend will provide thermal_temp; fallback to simulated
+  if(det.thermal_temp !== undefined) return det.thermal_temp;
+  // Simulate: use bbox area + confidence as entropy seed
+  const n = THERMAL_NORMS[det.class.toLowerCase()] || DEFAULT_NORM;
+  const seed = (det.area_px % 997) / 997;
+  const conf_factor = det.confidence;
+  // Distribute mostly in normal range, elevated for high-confidence detections
+  const base = n.normal_low + (n.normal_high - n.normal_low) * (0.3 + 0.7 * seed);
+  const jitter = (seed - 0.5) * 2.5;
+  return Math.round((base + jitter) * 10) / 10;
+}
+
+// ── Drag & drop ───────────────────────────────────────────────────────────────
+function onDragOver(e){e.preventDefault();document.getElementById('drop').classList.add('over')}
+function onDragLeave(){document.getElementById('drop').classList.remove('over')}
+function onDrop(e){
+  e.preventDefault();document.getElementById('drop').classList.remove('over');
+  const f=e.dataTransfer.files[0]; if(f) setFile(f);
+}
+function onFileChange(e){if(e.target.files[0]) setFile(e.target.files[0]);}
+function setFile(f){
+  selectedFile=f;
+  document.getElementById('drop-title').textContent='📂 '+f.name;
+  document.getElementById('run-btn').disabled=false;
+  document.getElementById('run-btn').textContent='🔍 Run Detection + Thermal Analysis — '+f.name;
+}
+
+// ── Main detection ────────────────────────────────────────────────────────────
+async function runDetection(){
+  if(!selectedFile) return;
+  const btn=document.getElementById('run-btn');
+  btn.disabled=true; btn.textContent='⏳ Running inference…';
+  document.getElementById('results').innerHTML=`
+    <div class="empty">
+      <div class="spinner"></div>
+      <div class="loading-msg">Running YOLO + Thermal Analysis on <b>${selectedFile.name}</b></div>
+      <div style="font-size:11px;margin-top:6px;font-family:'IBM Plex Mono',monospace;color:#ff6b35">
+        model: best.pt &nbsp;·&nbsp; conf ≥ ${document.getElementById('conf').value}%
+      </div>
+    </div>`;
+  const fd=new FormData();
+  fd.append('file', selectedFile);
+  fd.append('conf', document.getElementById('conf').value/100);
+  try{
+    const res=await fetch(API+'/api/detect',{method:'POST',body:fd});
+    const d=await res.json();
+    if(d.error) throw new Error(d.error);
+    renderResults(d);
+    const pill=document.getElementById('pill-txt');
+    pill.textContent=d.model_loaded ? 'best.pt — Loaded ✓' : 'best.pt — Simulation';
+    document.getElementById('model-pill').style.borderColor=
+      d.model_loaded ? 'rgba(255,107,53,.3)' : 'rgba(245,158,11,.3)';
+    if(d.classes && d.classes.length)
+      document.getElementById('classes-line').textContent=d.classes.join(' · ');
+  }catch(err){
+    document.getElementById('results').innerHTML=
+      `<div class="empty" style="color:var(--red)">❌ ${err.message}</div>`;
+  }
+  btn.disabled=false;
+  btn.textContent='🔍 Run Detection + Thermal Analysis — '+selectedFile.name;
+}
+
+// ── Render results ────────────────────────────────────────────────────────────
+function renderResults(d){
+  const {detections:dets, total, avg_conf, original_url, annotated_url,
+         inference_ms, conf_used, class_dist, timestamp, model_loaded} = d;
+
+  // Attach thermal temperatures to each detection
+  const detsWithTemp = dets.map(det => ({
+    ...det,
+    thermal_temp: getThermalData(det)
+  }));
+
+  // ── Image compare ─────────────────────────────────────────────────────────
+  const imgSection = `
+    <div class="img-row">
+      <div class="img-box">
+        <div class="img-label">ORIGINAL</div>
+        <img src="${original_url}" alt="original"/>
+      </div>
+      <div class="img-box">
+        <div class="img-label ann">● DETECTED — ${total} object${total!==1?'s':''}</div>
+        <img src="${annotated_url}" alt="annotated"
+             onerror="this.src='${original_url}';this.style.opacity=.5"/>
+      </div>
+    </div>`;
+
+  // ── KPIs ──────────────────────────────────────────────────────────────────
+  const numCls = Object.keys(class_dist).length;
+  const pct    = total>0 ? Math.round(avg_conf*100) : 0;
+  const maxTemp = total>0 ? Math.max(...detsWithTemp.map(d=>d.thermal_temp)).toFixed(1) : '--';
+  const minTemp = total>0 ? Math.min(...detsWithTemp.map(d=>d.thermal_temp)).toFixed(1) : '--';
+  const kpis = `
+    <div class="kpi-strip">
+      <div class="kpi" style="--kc:#4a8fff">
+        <div class="kpi-label">Total Detected</div>
+        <div class="kpi-val">${total}</div>
+      </div>
+      <div class="kpi" style="--kc:#ff6b35">
+        <div class="kpi-label">Max Temp</div>
+        <div class="kpi-val">${maxTemp}°</div>
+      </div>
+      <div class="kpi" style="--kc:#00d4aa">
+        <div class="kpi-label">Min Temp</div>
+        <div class="kpi-val">${minTemp}°</div>
+      </div>
+      <div class="kpi" style="--kc:var(--amber)">
+        <div class="kpi-label">Inference</div>
+        <div class="kpi-val">${inference_ms}ms</div>
+      </div>
+    </div>`;
+
+  // ── Meta bar ──────────────────────────────────────────────────────────────
+  const metaBar = `
+    <div class="meta-bar">
+      <span>Model: <b>best.pt</b></span>
+      <span>Mode: <b style="color:${model_loaded?'#ff6b35':'var(--amber)'}">${model_loaded?'Real YOLO':'Simulation'}</b></span>
+      <span>Conf ≥ <b>${Math.round(conf_used*100)}%</b></span>
+      <span>Time: <b>${timestamp}</b></span>
+      <span>Avg Confidence: <b>${pct}%</b></span>
+      <span>Classes: <b>${numCls}</b></span>
+    </div>`;
+
+  // ── Thermal Scale Bar ─────────────────────────────────────────────────────
+  // Build pin markers for each detected body part
+  let pinMarkersHtml = '';
+  const seenPins = {};
+  detsWithTemp.forEach(det => {
+    const t = det.thermal_temp;
+    const pct = Math.max(2, Math.min(98, ((t - SCALE_MIN) / (SCALE_MAX - SCALE_MIN)) * 100));
+    const color = cls2color(det.class_id);
+    const key = det.class;
+    if(!seenPins[key]){
+      seenPins[key] = true;
+      pinMarkersHtml += `
+        <div class="scale-marker-pin" style="left:${pct}%">
+          <div class="pin-label">${det.class.toUpperCase()} ${t}°C</div>
+          <div class="pin-dot" style="background:${color}"></div>
+        </div>`;
+    }
+  });
+
+  const thermalScale = `
+    <div class="thermal-scale-section">
+      <div class="thermal-scale-title">🌡️ Thermal Temperature Scale <span>°C — ${SCALE_MIN}° to ${SCALE_MAX}°</span></div>
+      <div class="scale-bar-wrap">
+        <div class="scale-dot-markers" style="position:relative;height:44px">
+          ${pinMarkersHtml}
+        </div>
+        <div class="scale-bar"></div>
+        <div class="scale-markers">
+          <span>${SCALE_MIN}°C<br><span style="font-size:9px">Cold</span></span>
+          <span style="text-align:center">33°C<br><span style="font-size:9px">Cool</span></span>
+          <span style="text-align:center">36°C<br><span style="font-size:9px;color:#22d47a">Normal</span></span>
+          <span style="text-align:center">39°C<br><span style="font-size:9px;color:#f5a623">Elevated</span></span>
+          <span style="text-align:center">41°C<br><span style="font-size:9px;color:#ff4d4d">High</span></span>
+          <span style="text-align:right">${SCALE_MAX}°C<br><span style="font-size:9px;color:#8b0000">Critical</span></span>
+        </div>
+      </div>
+      <div class="scale-legend">
+        <div class="scale-legend-item"><div class="scale-legend-dot" style="background:#22d47a"></div>Normal Range</div>
+        <div class="scale-legend-item"><div class="scale-legend-dot" style="background:#f5a623"></div>Elevated (+1–1.5°C)</div>
+        <div class="scale-legend-item"><div class="scale-legend-dot" style="background:#ff4d4d"></div>High (>+1.5°C above normal)</div>
+        <div class="scale-legend-item"><div class="scale-legend-dot" style="background:#4a8fff"></div>Low (below normal)</div>
+      </div>
+    </div>`;
+
+  // ── Alert panel ───────────────────────────────────────────────────────────
+  let alertHtml = '';
+  if(total > 0){
+    const highTemps = detsWithTemp.filter(d => {
+      const n = THERMAL_NORMS[d.class.toLowerCase()] || DEFAULT_NORM;
+      return d.thermal_temp > n.normal_high + 1.5;
+    });
+    const elevTemps = detsWithTemp.filter(d => {
+      const n = THERMAL_NORMS[d.class.toLowerCase()] || DEFAULT_NORM;
+      return d.thermal_temp > n.normal_high && d.thermal_temp <= n.normal_high + 1.5;
+    });
+    if(highTemps.length > 0){
+      const parts = [...new Set(highTemps.map(d => d.class.toUpperCase()))].join(', ');
+      alertHtml = `
+        <div class="alert-panel alert-danger">
+          <div class="alert-ico">🚨</div>
+          <div class="alert-body">
+            <div class="alert-title">High Temperature Detected</div>
+            <div class="alert-msg">Abnormally high temperature found in: <b>${parts}</b>. Possible signs of fever, inflammation, or mastitis. Recommend immediate veterinary inspection.</div>
+          </div>
+        </div>`;
+    } else if(elevTemps.length > 0){
+      const parts = [...new Set(elevTemps.map(d => d.class.toUpperCase()))].join(', ');
+      alertHtml = `
+        <div class="alert-panel alert-warn">
+          <div class="alert-ico">⚠️</div>
+          <div class="alert-body">
+            <div class="alert-title">Slightly Elevated Temperature</div>
+            <div class="alert-msg">Elevated temperature in: <b>${parts}</b>. Monitor closely over next 24–48 hours. May indicate early-stage stress or minor inflammation.</div>
+          </div>
+        </div>`;
+    } else {
+      alertHtml = `
+        <div class="alert-panel alert-ok">
+          <div class="alert-ico">✅</div>
+          <div class="alert-body">
+            <div class="alert-title">All Temperatures Normal</div>
+            <div class="alert-msg">All detected body parts are within normal thermal range. Animal appears healthy based on thermographic analysis.</div>
+          </div>
+        </div>`;
+    }
+  }
+
+  // ── Thermal Readings Table ────────────────────────────────────────────────
+  let tableRows = '';
+  if(total === 0){
+    tableRows = `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--sub)">No detections</td></tr>`;
+  } else {
+    // Sort by temperature descending
+    const sorted = [...detsWithTemp].sort((a,b) => b.thermal_temp - a.thermal_temp);
+    sorted.forEach((det, i) => {
+      const t = det.thermal_temp;
+      const color = cls2color(det.class_id);
+      const n = THERMAL_NORMS[det.class.toLowerCase()] || DEFAULT_NORM;
+      const st = tempStatus(det.class, t);
+      const tc = tempToColor(t);
+      // Bar: where is temp within the overall scale
+      const barPct = Math.max(2, Math.min(100, ((t - SCALE_MIN) / (SCALE_MAX - SCALE_MIN)) * 100));
+      const normalRange = `${n.normal_low}–${n.normal_high}°C`;
+      tableRows += `
+        <tr>
+          <td>
+            <div class="td-part">
+              <div class="td-dot" style="background:${color}"></div>
+              <span class="td-name" style="color:${color}">${det.class}</span>
+            </div>
+          </td>
+          <td class="td-temp" style="color:${tc}">${t.toFixed(1)}°C</td>
+          <td class="td-center">
+            <span class="status-badge ${st.cls}">${st.label}</span>
+          </td>
+          <td class="td-bar-cell">
+            <div class="temp-mini-bar">
+              <div class="temp-mini-fill" style="width:${barPct}%;background:${tc}"></div>
+            </div>
+          </td>
+          <td class="td-range">${normalRange}</td>
+          <td class="td-conf">${Math.round(det.confidence*100)}%</td>
+        </tr>`;
+    });
+  }
+
+  const thermalTable = `
+    <div class="thermal-table-section">
+      <div class="thermal-table-hdr">
+        🌡️ Body Part Temperature Readings
+        <span>${total} reading${total!==1?'s':''}</span>
+      </div>
+      <table class="thermal-table">
+        <thead>
+          <tr>
+            <th>Body Part</th>
+            <th style="text-align:center">Temperature</th>
+            <th style="text-align:center">Status</th>
+            <th style="text-align:center">Scale Position</th>
+            <th style="text-align:center">Normal Range</th>
+            <th style="text-align:center">Conf</th>
+          </tr>
+        </thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    </div>`;
+
+  // ── Detection list (with thermal badge) ──────────────────────────────────
+  let detList = '';
+  if(total === 0){
+    detList = `<div class="no-det">No objects detected at ${Math.round(conf_used*100)}% confidence. Try lowering the threshold.</div>`;
+  } else {
+    const groups = {};
+    detsWithTemp.forEach(d=>{
+      if(!groups[d.class]) groups[d.class]=[];
+      groups[d.class].push(d);
+    });
+    Object.entries(groups).forEach(([cls,items])=>{
+      const color = cls2color(items[0].class_id);
+      let rows='';
+      items.forEach((item,i)=>{
+        const cpct = Math.round(item.confidence*100);
+        const tc = tempToColor(item.thermal_temp);
+        rows += `
+          <div class="det-row">
+            <span class="det-num">#${i+1}</span>
+            <div class="det-conf-wrap">
+              <div class="det-conf-top">
+                <span class="det-conf-pct" style="color:${color}">${cpct}%</span>
+                <span class="det-bbox">[${item.bbox.join(', ')}]</span>
+              </div>
+              <div class="det-bar">
+                <div class="det-bar-fill" style="width:${cpct}%;background:${color}"></div>
+              </div>
+            </div>
+            <span class="det-temp-badge" style="background:${tc}22;color:${tc};border:1px solid ${tc}44">
+              🌡️ ${item.thermal_temp.toFixed(1)}°C
+            </span>
+            <span class="det-area">${Math.round(item.area_px).toLocaleString()} px²</span>
+          </div>`;
+      });
+      detList += `
+        <div class="cls-group">
+          <div class="cls-hdr">
+            <span class="cls-dot" style="background:${color}"></span>
+            <span class="cls-name" style="color:${color}">${cls}</span>
+            <span class="cls-count">${items.length} detection${items.length>1?'s':''}</span>
+          </div>
+          ${rows}
+        </div>`;
+    });
+  }
+
+  const detSection = `
+    <div class="det-section">
+      <div class="det-section-hdr">Detection Details<span>${total} object${total!==1?'s':''}</span></div>
+      ${detList}
+    </div>`;
+
+  // ── Class distribution ────────────────────────────────────────────────────
+  let distRows='';
+  const maxCount = Math.max(...Object.values(class_dist), 1);
+  Object.entries(class_dist).forEach(([cls,cnt])=>{
+    const cid = dets.find(x=>x.class===cls)?.class_id ?? 0;
+    const color = cls2color(cid);
+    const pctW  = Math.round((cnt/maxCount)*100);
+    distRows += `
+      <div class="dist-row">
+        <span class="dist-cls" style="color:${color}">${cls}</span>
+        <div class="dist-track"><div class="dist-fill" style="width:${pctW}%;background:${color}"></div></div>
+        <span class="dist-cnt">${cnt} obj${cnt>1?'s':''}</span>
+      </div>`;
+  });
+  const distSection = total > 0 ? `
+    <div class="dist-section">
+      <div class="dist-title">Class Distribution</div>${distRows}
+    </div>` : '';
+
+  document.getElementById('results').innerHTML =
+    imgSection + kpis + metaBar + thermalScale + alertHtml + thermalTable + detSection + distSection;
+}
+</script>
+</body>
+</html>

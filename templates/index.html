@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Livestock Detection — best.pt</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0c0f;
+  --card:#111418;
+  --border:#1e2530;
+  --border2:#2a3545;
+  --text:#dde4ed;
+  --sub:#6b7a8d;
+  --acc:#00e5b0;
+  --acc2:#00b88c;
+  --blue:#4a8fff;
+  --amber:#f5a623;
+  --red:#ff4d4d;
+  --green:#22d47a;
+  --purple:#9b6dff;
+  --r:10px;
+}
+
+body{
+  font-family:'IBM Plex Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:32px 16px 60px;
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+.hdr{
+  width:100%;max-width:900px;
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:32px;
+  padding-bottom:20px;
+  border-bottom:1px solid var(--border);
+}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-box{
+  width:44px;height:44px;
+  background:linear-gradient(135deg,var(--acc),#0077cc);
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;
+}
+.logo h1{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.logo p{font-size:11px;color:var(--acc);font-family:'IBM Plex Mono',monospace;letter-spacing:1px;text-transform:uppercase}
+.model-pill{
+  background:rgba(0,229,176,.08);
+  border:1px solid rgba(0,229,176,.2);
+  color:var(--acc);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;padding:5px 14px;border-radius:20px;
+  display:flex;align-items:center;gap:7px;
+}
+.dot-live{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--acc);
+  animation:pulse 1.8s infinite;
+}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,229,176,.5)}50%{box-shadow:0 0 0 5px rgba(0,229,176,0)}}
+
+/* ── Upload card ─────────────────────────────────────────── */
+.upload-card{
+  width:100%;max-width:900px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:28px;
+  margin-bottom:20px;
+}
+
+.drop-zone{
+  border:2px dashed var(--border2);
+  border-radius:var(--r);
+  padding:50px 24px;
+  text-align:center;
+  cursor:pointer;
+  transition:.2s;
+  background:rgba(255,255,255,.01);
+}
+.drop-zone:hover,.drop-zone.over{
+  border-color:var(--acc);
+  background:rgba(0,229,176,.04);
+}
+.drop-zone input{display:none}
+.drop-ico{font-size:44px;margin-bottom:12px;line-height:1}
+.drop-title{font-size:16px;font-weight:600;margin-bottom:5px}
+.drop-sub{font-size:12px;color:var(--sub)}
+.drop-classes{
+  margin-top:10px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;color:var(--acc);
+  letter-spacing:.5px;
+}
+
+/* Conf slider row */
+.conf-row{
+  display:flex;align-items:center;gap:14px;
+  margin:18px 0;
+  padding:14px 16px;
+  background:rgba(255,255,255,.02);
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.conf-row label{font-size:12px;color:var(--sub);white-space:nowrap}
+.conf-row input[type=range]{flex:1;accent-color:var(--acc)}
+.conf-row .conf-num{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:13px;font-weight:600;
+  color:var(--acc);min-width:36px;
+}
+
+/* Run button */
+.run-btn{
+  width:100%;padding:13px;
+  background:var(--acc);color:#000;
+  border:none;border-radius:8px;
+  font-size:14px;font-weight:700;
+  font-family:'IBM Plex Sans',sans-serif;
+  cursor:pointer;transition:.2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.run-btn:hover{background:var(--acc2);transform:translateY(-1px)}
+.run-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+/* ── Results ─────────────────────────────────────────────── */
+#results{width:100%;max-width:900px}
+
+/* Image compare */
+.img-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:20px;
+}
+.img-box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.img-label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;letter-spacing:1px;
+  padding:7px 12px;
+  background:rgba(255,255,255,.03);
+  border-bottom:1px solid var(--border);
+  color:var(--sub);
+}
+.img-label.ann{color:var(--acc)}
+.img-box img{width:100%;display:block}
+
+/* KPI strip */
+.kpi-strip{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-bottom:20px;
+}
+.kpi{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:14px;
+  text-align:center;
+  position:relative;overflow:hidden;
+}
+.kpi::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--kc,var(--acc));
+}
+.kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--sub);margin-bottom:8px}
+.kpi-val{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:700;color:var(--kc,var(--acc))}
+
+/* Inference meta */
+.meta-bar{
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  padding:10px 14px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:8px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;color:var(--sub);
+  margin-bottom:20px;
+}
+.meta-bar span b{color:var(--text)}
+
+/* Detection list */
+.det-section{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  overflow:hidden;
+}
+.det-section-hdr{
+  padding:12px 18px;
+  font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:1.5px;
+  border-bottom:1px solid var(--border);
+  color:var(--sub);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.det-section-hdr span{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:13px;color:var(--text);
+}
+
+/* Class group */
+.cls-group{padding:14px 18px;border-bottom:1px solid var(--border)}
+.cls-group:last-child{border-bottom:none}
+.cls-hdr{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:10px;
+}
+.cls-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.cls-name{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px}
+.cls-count{font-size:11px;color:var(--sub);font-family:'IBM Plex Mono',monospace}
+
+.det-row{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 10px;
+  background:rgba(255,255,255,.02);
+  border-radius:6px;
+  margin-bottom:6px;
+  border:1px solid var(--border);
+}
+.det-row:last-child{margin-bottom:0}
+.det-num{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--sub);min-width:20px}
+.det-conf-wrap{flex:1}
+.det-conf-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.det-conf-pct{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700}
+.det-bbox{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--sub)}
+.det-bar{height:4px;background:var(--border2);border-radius:2px;overflow:hidden}
+.det-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.det-area{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--sub);white-space:nowrap}
+
+/* Class dist */
+.dist-section{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:18px;
+  margin-top:12px;
+}
+.dist-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--sub);margin-bottom:14px}
+.dist-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.dist-row:last-child{margin-bottom:0}
+.dist-cls{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;min-width:52px}
+.dist-track{flex:1;height:6px;background:var(--border2);border-radius:3px;overflow:hidden}
+.dist-fill{height:100%;border-radius:3px;transition:width .8s ease}
+.dist-cnt{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--sub);min-width:50px;text-align:right}
+
+/* Empty / spinner */
+.empty{
+  text-align:center;padding:60px 24px;
+  font-size:13px;color:var(--sub);
+}
+.spinner{
+  width:36px;height:36px;
+  border:3px solid var(--border2);
+  border-top-color:var(--acc);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+  margin:0 auto 14px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-msg{font-size:13px;color:var(--sub);margin-top:4px}
+
+/* No detections */
+.no-det{
+  text-align:center;padding:36px;
+  font-size:13px;color:var(--amber);
+}
+
+/* Responsive */
+@media(max-width:620px){
+  .img-row{grid-template-columns:1fr}
+  .kpi-strip{grid-template-columns:repeat(2,1fr)}
+  .hdr{flex-direction:column;gap:12px;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="hdr">
+  <div class="logo">
+    <div class="logo-box">🐄</div>
+    <div>
+      <h1>Livestock Detection</h1>
+      <p>YOLO · best.pt</p>
+    </div>
+  </div>
+  <div class="model-pill" id="model-pill">
+    <span class="dot-live"></span>
+    <span id="pill-txt">best.pt — Loading…</span>
+  </div>
+</header>
+
+<!-- Upload -->
+<div class="upload-card">
+
+  <div class="drop-zone" id="drop"
+       onclick="document.getElementById('file-inp').click()"
+       ondragover="onDragOver(event)"
+       ondragleave="onDragLeave()"
+       ondrop="onDrop(event)">
+    <input type="file" id="file-inp" accept=".png,.jpg,.jpeg,.webp,.bmp"
+           onchange="onFileChange(event)"/>
+    <div class="drop-ico">🐄</div>
+    <div class="drop-title" id="drop-title">Drop livestock image here</div>
+    <div class="drop-sub">PNG · JPG · JPEG · WEBP · BMP</div>
+    <div class="drop-classes" id="classes-line">ear · eyes · eyess · hump · neck · udder</div>
+  </div>
+
+  <div class="conf-row">
+    <label>Confidence Threshold</label>
+    <input type="range" id="conf" min="10" max="90" value="25" step="5"
+           oninput="document.getElementById('conf-num').textContent=this.value+'%'"/>
+    <span class="conf-num" id="conf-num">25%</span>
+  </div>
+
+  <button class="run-btn" id="run-btn" disabled onclick="runDetection()">
+    🔍 Run Detection
+  </button>
+</div>
+
+<!-- Results -->
+<div id="results">
+  <div class="empty">Upload an image and click Run Detection</div>
+</div>
+
+<script>
+const API = window.location.origin;
+let selectedFile = null;
+
+// ── Drag & drop ───────────────────────────────────────────────────────────────
+function onDragOver(e){e.preventDefault();document.getElementById('drop').classList.add('over')}
+function onDragLeave(){document.getElementById('drop').classList.remove('over')}
+function onDrop(e){
+  e.preventDefault();
+  document.getElementById('drop').classList.remove('over');
+  const f=e.dataTransfer.files[0];
+  if(f) setFile(f);
+}
+function onFileChange(e){if(e.target.files[0]) setFile(e.target.files[0]);}
+function setFile(f){
+  selectedFile=f;
+  document.getElementById('drop-title').textContent='📂 '+f.name;
+  document.getElementById('run-btn').disabled=false;
+  document.getElementById('run-btn').textContent='🔍 Run Detection — '+f.name;
+}
+
+// ── Colour palette (matches server) ──────────────────────────────────────────
+const COLORS=[
+  '#00d4aa','#4a8fff','#f97316',
+  '#9b6dff','#ff4d4d','#22d47a','#ec4899','#f5a623'
+];
+function cls2color(clsId){return COLORS[clsId%COLORS.length]}
+
+// ── Fetch classes from first detect call ──────────────────────────────────────
+async function pingStatus(){
+  // We'll get the status from the first /api/detect call's response
+  // For now just indicate loading done
+  document.getElementById('pill-txt').textContent='best.pt — Ready';
+}
+pingStatus();
+
+// ── Main detection ────────────────────────────────────────────────────────────
+async function runDetection(){
+  if(!selectedFile) return;
+  const btn=document.getElementById('run-btn');
+  btn.disabled=true; btn.textContent='⏳ Running inference…';
+
+  document.getElementById('results').innerHTML=`
+    <div class="empty">
+      <div class="spinner"></div>
+      <div class="loading-msg">Running YOLO on <b>${selectedFile.name}</b></div>
+      <div style="font-size:11px;margin-top:6px;font-family:'IBM Plex Mono',monospace;color:var(--acc)">
+        model: best.pt &nbsp;·&nbsp; conf ≥ ${document.getElementById('conf').value}%
+      </div>
+    </div>`;
+
+  const fd=new FormData();
+  fd.append('file', selectedFile);
+  fd.append('conf', document.getElementById('conf').value/100);
+
+  try{
+    const res=await fetch(API+'/api/detect',{method:'POST',body:fd});
+    const d=await res.json();
+    if(d.error) throw new Error(d.error);
+    renderResults(d);
+    // Update pill
+    const pill=document.getElementById('pill-txt');
+    pill.textContent=d.model_loaded ? 'best.pt — Loaded ✓' : 'best.pt — Simulation';
+    document.getElementById('model-pill').style.borderColor=
+      d.model_loaded ? 'rgba(0,229,176,.3)' : 'rgba(245,158,11,.3)';
+    // Update classes line
+    if(d.classes && d.classes.length)
+      document.getElementById('classes-line').textContent=d.classes.join(' · ');
+  }catch(err){
+    document.getElementById('results').innerHTML=
+      `<div class="empty" style="color:var(--red)">❌ ${err.message}</div>`;
+  }
+  btn.disabled=false;
+  btn.textContent='🔍 Run Detection — '+selectedFile.name;
+}
+
+// ── Render results ────────────────────────────────────────────────────────────
+function renderResults(d){
+  const {detections:dets, total, avg_conf, original_url, annotated_url,
+         inference_ms, conf_used, class_dist, timestamp, model_loaded} = d;
+
+  // ── Image compare ──────────────────────────────────────────────────────────
+  const imgSection = `
+    <div class="img-row">
+      <div class="img-box">
+        <div class="img-label">ORIGINAL</div>
+        <img src="${original_url}" alt="original"/>
+      </div>
+      <div class="img-box">
+        <div class="img-label ann">
+          ● DETECTED — ${total} object${total!==1?'s':''}
+        </div>
+        <img src="${annotated_url}" alt="annotated"
+             onerror="this.src='${original_url}';this.style.opacity=.5"/>
+      </div>
+    </div>`;
+
+  // ── KPIs ───────────────────────────────────────────────────────────────────
+  const numCls = Object.keys(class_dist).length;
+  const pct    = total>0 ? Math.round(avg_conf*100) : 0;
+  const kpis = `
+    <div class="kpi-strip">
+      <div class="kpi" style="--kc:var(--blue)">
+        <div class="kpi-label">Total Detected</div>
+        <div class="kpi-val">${total}</div>
+      </div>
+      <div class="kpi" style="--kc:var(--acc)">
+        <div class="kpi-label">Avg Confidence</div>
+        <div class="kpi-val">${pct}%</div>
+      </div>
+      <div class="kpi" style="--kc:var(--purple)">
+        <div class="kpi-label">Classes Found</div>
+        <div class="kpi-val">${numCls}</div>
+      </div>
+      <div class="kpi" style="--kc:var(--amber)">
+        <div class="kpi-label">Inference Time</div>
+        <div class="kpi-val">${inference_ms}ms</div>
+      </div>
+    </div>`;
+
+  // ── Meta bar ───────────────────────────────────────────────────────────────
+  const metaBar = `
+    <div class="meta-bar">
+      <span>Model: <b>best.pt</b></span>
+      <span>Mode: <b style="color:${model_loaded?'var(--acc)':'var(--amber)'}">${model_loaded?'Real YOLO':'Simulation'}</b></span>
+      <span>Conf threshold: <b>${Math.round(conf_used*100)}%</b></span>
+      <span>Time: <b>${timestamp}</b></span>
+    </div>`;
+
+  // ── Detection rows ─────────────────────────────────────────────────────────
+  let detList = '';
+  if(total===0){
+    detList = `<div class="no-det">No objects detected at ${Math.round(conf_used*100)}% confidence. Try lowering the threshold.</div>`;
+  } else {
+    // Group by class
+    const groups = {};
+    dets.forEach(d=>{
+      if(!groups[d.class]) groups[d.class]=[];
+      groups[d.class].push(d);
+    });
+
+    Object.entries(groups).forEach(([cls,items])=>{
+      const color = cls2color(items[0].class_id);
+      let rows='';
+      items.forEach((item,i)=>{
+        const cpct = Math.round(item.confidence*100);
+        rows += `
+          <div class="det-row">
+            <span class="det-num">#${i+1}</span>
+            <div class="det-conf-wrap">
+              <div class="det-conf-top">
+                <span class="det-conf-pct" style="color:${color}">${cpct}%</span>
+                <span class="det-bbox">[${item.bbox.join(', ')}]</span>
+              </div>
+              <div class="det-bar">
+                <div class="det-bar-fill" style="width:${cpct}%;background:${color}"></div>
+              </div>
+            </div>
+            <span class="det-area">${Math.round(item.area_px).toLocaleString()} px²</span>
+          </div>`;
+      });
+
+      detList += `
+        <div class="cls-group">
+          <div class="cls-hdr">
+            <span class="cls-dot" style="background:${color}"></span>
+            <span class="cls-name" style="color:${color}">${cls}</span>
+            <span class="cls-count">${items.length} detection${items.length>1?'s':''}</span>
+          </div>
+          ${rows}
+        </div>`;
+    });
+  }
+
+  const detSection = `
+    <div class="det-section">
+      <div class="det-section-hdr">
+        Detection Results
+        <span>${total} object${total!==1?'s':''}</span>
+      </div>
+      ${detList}
+    </div>`;
+
+  // ── Class distribution ─────────────────────────────────────────────────────
+  let distRows='';
+  const maxCount = Math.max(...Object.values(class_dist), 1);
+  Object.entries(class_dist).forEach(([cls,cnt])=>{
+    const cid = dets.find(x=>x.class===cls)?.class_id ?? 0;
+    const color = cls2color(cid);
+    const pctW  = Math.round((cnt/maxCount)*100);
+    distRows += `
+      <div class="dist-row">
+        <span class="dist-cls" style="color:${color}">${cls}</span>
+        <div class="dist-track">
+          <div class="dist-fill" style="width:${pctW}%;background:${color}"></div>
+        </div>
+        <span class="dist-cnt">${cnt} obj${cnt>1?'s':''}</span>
+      </div>`;
+  });
+
+  const distSection = total > 0 ? `
+    <div class="dist-section">
+      <div class="dist-title">Class Distribution</div>
+      ${distRows}
+    </div>` : '';
+
+  document.getElementById('results').innerHTML =
+    imgSection + kpis + metaBar + detSection + distSection;
+}
+</script>
+</body>
+</html>

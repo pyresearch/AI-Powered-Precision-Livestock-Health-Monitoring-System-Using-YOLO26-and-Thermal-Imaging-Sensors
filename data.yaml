@@ -5,9 +5,3 @@ test: ../test/images
 nc: 5
 names: ['ear', 'eyes', 'hump', 'neck', 'udder']
 
-roboflow:
-  workspace: identificador-de-mastite-bovina
-  project: thermal-images-of-cows-ow0aa
-  version: 1
-  license: CC BY 4.0
-  url: https://universe.roboflow.com/identificador-de-mastite-bovina/thermal-images-of-cows-ow0aa/dataset/1
